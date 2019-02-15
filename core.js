@@ -1,4 +1,4 @@
-const { execSync } = require('child_process')
+const childProcess = require('child_process')
 
 const packageVersion = process.env.npm_package_version;
 const versionPrefix = process.env.npm_config_tag_version_prefix;
@@ -16,13 +16,17 @@ if (typeof versionPrefix !== 'string' || versionPrefix.length === 0) {
   exit('$npm_config_tag_version_prefix must be set');
 }
 
+function $(command) {
+  return childProcess.execSync(command, { encoding: 'utf-8' }).toString().trim();
+}
+
 function graphql(query) {
   const fullQuery = `query { repository(owner:\\"{owner}\\", name:\\"{repo}\\") { ${query} } }`;
   const command = `hub api graphql -f query="${fullQuery}"`;
 
   let result;
   try {
-    result = JSON.parse(execSync(command));
+    result = JSON.parse($(command));
   } catch(error) {
     exit(`failed to execute query: ${error}`)
   }
@@ -43,9 +47,9 @@ function getDefaultBranch() {
 }
 
 function ensureSynchronized() {
-  const current = execSync('hub rev-parse --abbrev-ref HEAD');
-  const upstream = execSync('hub rev-parse --abbrev-ref --symbolic-full-name @{u}');
-  const range = execSync(`hub rev-parse -q ${current} ${upstream}`);
+  const current = $('hub rev-parse --abbrev-ref HEAD');
+  const upstream = $('hub rev-parse --abbrev-ref --symbolic-full-name @{u}');
+  const range = $(`hub rev-parse -q ${current} ${upstream}`);
   const [start, end] = range.split(/(\s+)/);
   if (start !== end) {
     exit('local branch is not in sync with upstream');
@@ -77,24 +81,24 @@ function preversion() {
   const defaultBranch = getDefaultBranch();
 
   // checkout development branch
-  execSync(`hub checkout ${defaultBranch}`);
+  $(`hub checkout ${defaultBranch}`);
   // bring in any changes from upstream
-  execSync(`hub sync`);
+  $(`hub sync`);
   // ensure local and remote head branch are in sync (`hub sync` only warns)
   ensureSynchronized();
   // run test suite
-  execSync(`npm test`);
+  $(`npm test`);
 }
 
 function version() {
   const bumpPlugin = `@jarrodldavis/changelog-version-bump=version:'${packageVersion}'`;
 
   // create new release branch
-  execSync(`hub checkout -b release/${packageVersion}`);
+  $(`hub checkout -b release/${packageVersion}`);
   // update changelog with new version
-  execSync(`remark CHANGELOG.md -o --use ${bumpPlugin}`);
+  $(`remark CHANGELOG.md -o --use ${bumpPlugin}`);
   // add changelog to staging (npm will handle creating the commit)
-  execSync('hub add CHANGELOG.md');
+  $('hub add CHANGELOG.md');
 }
 
 function postversion() {
@@ -102,9 +106,9 @@ function postversion() {
   const milestone = `${versionPrefix}${packageVersion}`;
 
   // publish branch
-  execSync(`hub push --follow-tags --set-upstream origin release/${packageVersion}`);
+  $(`hub push --follow-tags --set-upstream origin release/${packageVersion}`);
   // create pull request
-  execSync(`hub pull-request --no-edit --b ${productionBranch} -m "${milestone}"`);
+  $(`hub pull-request --no-edit --b ${productionBranch} -m "${milestone}"`);
 }
 
 module.exports = { preversion, version, postversion };
