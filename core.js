@@ -2,6 +2,7 @@ const childProcess = require('child_process')
 
 const packageVersion = process.env.npm_package_version;
 const versionPrefix = process.env.npm_config_tag_version_prefix;
+const commitMessage = process.env.npm_config_message;
 
 function exit(message) {
   console.error(`npm version: ${message}`);
@@ -14,6 +15,10 @@ if (typeof packageVersion !== 'string' || packageVersion.length === 0) {
 
 if (typeof versionPrefix !== 'string' || versionPrefix.length === 0) {
   exit('$npm_config_tag_version_prefix must be set');
+}
+
+if (typeof commitMessage !== 'string' || commitMessage.length === 0) {
+  exit('$npm_config_message must be set');
 }
 
 function $(command) {
@@ -108,7 +113,7 @@ function postversion() {
   // publish branch
   $(`hub push --follow-tags --set-upstream origin release/${packageVersion}`);
   // create pull request
-  $(`hub pull-request --no-edit --b ${productionBranch} -m "${milestone}"`);
+  $(`hub pull-request --no-edit --message = "${commitMessage}" --base "${productionBranch}" --milestone "${milestone}"`);
 }
 
 module.exports = { preversion, version, postversion };
