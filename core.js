@@ -119,7 +119,7 @@ function postversion() {
   // publish branch
   $(`hub push --follow-tags --set-upstream origin release/${packageVersion}`);
   // create pull request
-  $(`hub pull-request --no-edit --message = "${commitMessage}" --base "${productionBranch}" --milestone "${milestone}"`);
+  $(`hub pull-request --no-edit --message "${commitMessage}" --base "${productionBranch}" --milestone "${milestone}"`);
 }
 
 module.exports = { preversion, version, postversion };
