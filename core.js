@@ -96,7 +96,7 @@ function version() {
   // create new release branch
   $(`hub checkout -b release/${packageVersion}`);
   // update changelog with new version
-  $(`remark CHANGELOG.md -o --use ${bumpPlugin}`);
+  $(`remark CHANGELOG.md -o --use "${bumpPlugin}"`);
   // add changelog to staging (npm will handle creating the commit)
   $('hub add CHANGELOG.md');
 }
