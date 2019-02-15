@@ -50,7 +50,7 @@ function ensureSynchronized() {
   const current = $('hub rev-parse --abbrev-ref HEAD');
   const upstream = $('hub rev-parse --abbrev-ref --symbolic-full-name @{u}');
   const range = $(`hub rev-parse -q ${current} ${upstream}`);
-  const [start, end] = range.split(/(\s+)/);
+  const [start, end] = range.split(/\s+/m);
   if (start !== end) {
     exit('local branch is not in sync with upstream');
   }
