@@ -31,7 +31,7 @@ function graphql(query) {
     exit(`unexpected result ${result} from query`);
   } else if (result.hasOwnProperty('errors')) {
     exit(`query returned errors: ${JSON.stringify(result.errors)}`);
-  } else if (typeof result.data !== 'object' || typeof result.data.repository !== 'repository') {
+  } else if (typeof result.data !== 'object' || typeof result.data.repository !== 'object') {
     exit(`could not find repository data from query result`);
   } else {
     return result.data.repository;
