@@ -1,4 +1,4 @@
-const childProcess = require('child_process')
+const childProcess = require('child_process');
 
 const packageVersion = process.env.npm_package_version;
 const versionPrefix = process.env.npm_config_tag_version_prefix;
@@ -19,6 +19,12 @@ if (typeof versionPrefix !== 'string' || versionPrefix.length === 0) {
 
 if (typeof commitMessage !== 'string' || commitMessage.length === 0) {
   exit('$npm_config_message must be set');
+}
+
+try {
+  $('which hub');
+} catch(error) {
+  exit('hub must be installed: https://hub.github.com');
 }
 
 function $(command) {
