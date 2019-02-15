@@ -17,7 +17,7 @@ if (typeof versionPrefix !== 'string' || versionPrefix.length === 0) {
 }
 
 function graphql(query) {
-  const fullQuery = `query { repository(owner:"{owner}", name:"{repo}") { ${query} } }`;
+  const fullQuery = `query { repository(owner:\\"{owner}\\", name:\\"{repo}\\") { ${query} } }`;
   const command = `hub api graphql -f query="${fullQuery}"`;
 
   let result;
