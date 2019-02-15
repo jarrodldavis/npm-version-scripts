@@ -4,6 +4,8 @@ const packageVersion = process.env.npm_package_version;
 const versionPrefix = process.env.npm_config_tag_version_prefix;
 const commitMessage = process.env.npm_config_message;
 
+const milestone = `${versionPrefix}${packageVersion}`;
+
 function exit(message) {
   console.error(`npm version: ${message}`);
   process.exit(1);
@@ -26,6 +28,8 @@ try {
 } catch(error) {
   exit('hub must be installed: https://hub.github.com');
 }
+
+ensureMilestone();
 
 function $(command) {
   return childProcess.execSync(command, { encoding: 'utf-8' }).toString().trim();
@@ -50,6 +54,14 @@ function graphql(query) {
     exit(`could not find repository data from query result`);
   } else {
     return result.data.repository;
+  }
+}
+
+function ensureMilestone() {
+  const query = 'milestones(first: 100, orderBy: { field: CREATED_AT, direction: DESC }, states: [OPEN]) { nodes { title } }';
+  const results = graphql(query).nodes.map(node => node.title);
+  if (!results.contains(milestone)) {
+    exit(`milestone ${milestone} does not exist`);
   }
 }
 
@@ -114,7 +126,6 @@ function version() {
 
 function postversion() {
   const productionBranch = determineProductionBranch();
-  const milestone = `${versionPrefix}${packageVersion}`;
 
   // publish branch
   $(`hub push --follow-tags --set-upstream origin release/${packageVersion}`);
