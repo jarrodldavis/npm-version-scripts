@@ -59,7 +59,7 @@ function graphql(query) {
 
 function ensureMilestone() {
   const query = 'milestones(first: 100, orderBy: { field: CREATED_AT, direction: DESC }, states: [OPEN]) { nodes { title } }';
-  const results = graphql(query).nodes.map(node => node.title);
+  const results = graphql(query).milestones.nodes.map(node => node.title);
   if (!results.contains(milestone)) {
     exit(`milestone ${milestone} does not exist`);
   }
