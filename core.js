@@ -28,14 +28,14 @@ try {
   exit('hub must be installed: https://hub.github.com');
 }
 
-ensureMilestone();
-
 const milestone = `${versionPrefix}${packageVersion}`;
 const releaseBranch = `release/${packageVersion}`;
 const prTitle = commitMessage.replace(/%s/g, packageVersion);
 
 const defaultBranch = getDefaultBranch();
 const productionBranch = determineProductionBranch();
+
+ensureMilestone();
 
 function $(command) {
   return childProcess.execSync(command, { encoding: 'utf-8' }).toString().trim();
