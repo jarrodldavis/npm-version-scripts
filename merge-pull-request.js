@@ -30,7 +30,7 @@ function mergePullRequest(prId, remote = "origin") {
   }
 
   const defaultBranch = getDefaultBranch();
-  if (details.headBranch.startsWith('release') && baseBranch !== defaultBranch && !isMergeVersionScript()) {
+  if (details.headBranch.startsWith('release') && details.baseBranch !== defaultBranch && !isMergeVersionScript()) {
     exit('use `npm run mergeversion` to merge release branches');
   }
 
