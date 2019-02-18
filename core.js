@@ -5,10 +5,6 @@ const packageVersion = process.env.npm_package_version;
 const versionPrefix = process.env.npm_config_tag_version_prefix;
 const commitMessage = process.env.npm_config_message;
 
-const milestone = `${versionPrefix}${packageVersion}`;
-
-const releaseBranch = `release/${packageVersion}`;
-
 function exit(message) {
   console.error(`npm version: ${message}`);
   process.exit(1);
@@ -33,6 +29,13 @@ try {
 }
 
 ensureMilestone();
+
+const milestone = `${versionPrefix}${packageVersion}`;
+const releaseBranch = `release/${packageVersion}`;
+const prTitle = commitMessage.replace(/%s/g, packageVersion);
+
+const defaultBranch = getDefaultBranch();
+const productionBranch = determineProductionBranch();
 
 function $(command) {
   return childProcess.execSync(command, { encoding: 'utf-8' }).toString().trim();
@@ -91,8 +94,6 @@ function determineProductionBranch() {
 
   const [{ name: firstBranch }, { name: secondBranch }] = branches;
 
-  const defaultBranch = getDefaultBranch();
-
   switch (defaultBranch) {
     case firstBranch:
       return secondBranch;
@@ -145,8 +146,6 @@ function mergePullRequest(prId, remote = "origin") {
 }
 
 function findVersionPullRequest() {
-  const productionBranch = determineProductionBranch();
-
   const rawResults = $(`hub pr list --head ${releaseBranch} --base ${productionBranch} -f "%I"`);
   const [id, ...others] = rawResults.split(EOL);
 
@@ -162,8 +161,6 @@ function findVersionPullRequest() {
 }
 
 function preversion() {
-  const defaultBranch = getDefaultBranch();
-
   // checkout development branch
   console.log($(`hub checkout ${defaultBranch}`));
   // bring in any changes from upstream
@@ -186,19 +183,13 @@ function version() {
 }
 
 function postversion() {
-  const productionBranch = determineProductionBranch();
-  const message = commitMessage.replace(/%s/g, packageVersion);
-
   // publish branch
   console.log($(`hub push --follow-tags --set-upstream origin ${releaseBranch}`));
   // create pull request
-  console.log($(`hub pull-request --no-edit --message "${message}" --base "${productionBranch}" --milestone "${milestone}"`));
+  console.log($(`hub pull-request --no-edit --message "${prTitle}" --base "${productionBranch}" --milestone "${milestone}"`));
 }
 
 function mergeversion() {
-  const defaultBranch = getDefaultBranch();
-  const productionBranch = determineProductionBranch();
-
   // find current pull request for version release
   const prId = findVersionPullRequest();
   // merge version release into production branch
@@ -208,7 +199,7 @@ function mergeversion() {
   // re-publish version branch
   console.log($(`hub push --follow-tags --set-upstream origin ${releaseBranch}`));
   // create pull request to merge production commits into default branch
-  console.log($(`hub pull-request --no-edit --message "${message}" --base "${defaultBranch}" --milestone "${milestone}"`));
+  console.log($(`hub pull-request --no-edit --message "${prTitle}" --base "${defaultBranch}" --milestone "${milestone}"`));
 }
 
 module.exports = { preversion, version, postversion, mergeversion };
