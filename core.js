@@ -6,6 +6,8 @@ const commitMessage = process.env.npm_config_message;
 
 const milestone = `${versionPrefix}${packageVersion}`;
 
+const releaseBranch = `release/${packageVersion}`;
+
 function exit(message) {
   console.error(`npm version: ${message}`);
   process.exit(1);
@@ -100,6 +102,60 @@ function determineProductionBranch() {
   }
 }
 
+function mergePullRequest(prId, remote = "origin") {
+  const separator = '|';
+  const rawResults = $(`hub pr list -f "%I${separator}%B${separator}%H${separator}%U${separator}%sH"`);
+  
+  const results = rawResults.split(EOL).map(line => {
+    const [id, baseBranch, headBranch, url, sha] = line.split(separator);
+    return { id, baseBranch, headBranch, url, sha };
+  });
+  
+  const details = results.find(detail => detail.id === prId);
+  
+  if (details === undefined) {
+    exit(`${prId} - not an open pull request number`)
+  }
+
+  try {
+    console.log($(`hub ci-status -v ${details.sha}`));
+  } catch(error) {
+    exit(`CI status not successful:${EOL}${error.stderr.toString().trim()}`);
+  }
+
+  // switch to pull request target branch
+  console.log($(`hub checkout ${details.baseBranch}`));
+  // bring in any changes from upstream
+  console.log($(`hub sync`));
+  // ensure local and remote head branch are in sync (`hub sync` only warns)
+  ensureSynchronized();
+  // Merge similar to GitHub Merge Button
+  console.log($(`hub merge ${details.url}`));
+  // Push merge to target branch
+  console.log($(`hub push`));
+  // Delete remote head branch
+  console.log($(`hub push ${remote} :${details.headBranch}`));
+  // Bring in any more changes and remote local head branch
+  console.log($(`hub sync`));
+}
+
+function findVersionPullRequest() {
+  const productionBranch = determineProductionBranch();
+
+  const rawResults = $(`hub pr list --head ${releaseBranch} --base ${productionBranch} -f "%I"`);
+  const [id, ...others] = rawResults.split(EOL);
+
+  if (id === undefined) {
+    const arrow = "\u2190";
+    exit(`no open pull request for ${productionBranch} ${arrow} ${releaseBranch}`);
+  } else if (others.length > 0) {
+    const arrow = "\u2190";
+    exit(`multiple pull requests open for ${productionBranch} ${arrow} ${releaseBranch}`);
+  }
+
+  return id;
+}
+
 function preversion() {
   const defaultBranch = getDefaultBranch();
 
@@ -117,7 +173,7 @@ function version() {
   const bumpPlugin = `@jarrodldavis/changelog-version-bump=version:'${packageVersion}'`;
 
   // create new release branch
-  $(`hub checkout -b release/${packageVersion}`);
+  $(`hub checkout -b ${releaseBranch}`);
   // update changelog with new version
   $(`remark CHANGELOG.md -o --use "${bumpPlugin}"`);
   // add changelog to staging (npm will handle creating the commit)
@@ -129,9 +185,25 @@ function postversion() {
   const message = commitMessage.replace(/%s/g, packageVersion);
 
   // publish branch
-  $(`hub push --follow-tags --set-upstream origin release/${packageVersion}`);
+  $(`hub push --follow-tags --set-upstream origin ${releaseBranch}`);
   // create pull request
   $(`hub pull-request --no-edit --message "${message}" --base "${productionBranch}" --milestone "${milestone}"`);
 }
 
-module.exports = { preversion, version, postversion };
+function mergeversion() {
+  const defaultBranch = getDefaultBranch();
+  const productionBranch = determineProductionBranch();
+
+  // find current pull request for version release
+  const prId = findVersionPullRequest();
+  // merge version release into production branch
+  mergePullRequest(prId);
+  // update/create release branch to match production branch
+  $(`hub checkout -B ${releaseBranch} ${productionBranch}`);
+  // re-publish version branch
+  $(`hub push --follow-tags --set-upstream origin ${releaseBranch}`);
+  // create pull request to merge production commits into default branch
+  $(`hub pull-request --no-edit --message "${message}" --base "${defaultBranch}" --milestone "${milestone}"`);
+}
+
+module.exports = { preversion, version, postversion, mergeversion };
