@@ -1,4 +1,5 @@
 const childProcess = require('child_process');
+const { EOL } = require('os');
 
 const packageVersion = process.env.npm_package_version;
 const versionPrefix = process.env.npm_config_tag_version_prefix;
