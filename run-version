@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 
-const { $ } = require('./helpers');
+const { $$ } = require('./helpers');
 const { getEnvironment } = require('./environment');
 const { getRepoInfo } = require('./repo');
 
@@ -10,8 +10,8 @@ const { releaseBranch } = getRepoInfo();
 const bumpPlugin = `@jarrodldavis/changelog-version-bump=version:'${packageVersion}'`;
 
 // create new release branch
-console.log($(`hub checkout -b ${releaseBranch}`));
+$$(`hub checkout -b ${releaseBranch}`);
 // update changelog with new version
-console.log($(`remark CHANGELOG.md -o --use "${bumpPlugin}"`));
+$$(`remark CHANGELOG.md -o --use "${bumpPlugin}"`);
 // add changelog to staging (npm will handle creating the commit)
-console.log($('hub add CHANGELOG.md'));
+$$('hub add CHANGELOG.md');

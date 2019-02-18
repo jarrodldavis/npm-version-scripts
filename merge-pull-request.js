@@ -1,6 +1,6 @@
 const { EOL } = require('os');
 
-const { $, exit } = require('./helpers');
+const { $, $$, exit } = require('./helpers');
 const { ensureHub } = require('./environment');
 const { ensureSynchronized, getDefaultBranch } = require('./repo');
 
@@ -35,25 +35,25 @@ function mergePullRequest(prId, remote = "origin") {
   }
 
   try {
-    console.log($(`hub ci-status -v ${details.sha}`));
+    $$(`hub ci-status -v ${details.sha}`);
   } catch(error) {
-    exit(`CI status not successful:${EOL}${error.stderr.toString().trim()}`);
+    exit(`CI status not successful`);
   }
 
   // switch to pull request target branch
-  console.log($(`hub checkout ${details.baseBranch}`));
+  $$(`hub checkout ${details.baseBranch}`);
   // bring in any changes from upstream
-  console.log($(`hub sync`));
+  $$(`hub sync`);
   // ensure local and remote head branch are in sync (`hub sync` only warns)
   ensureSynchronized();
   // Merge similar to GitHub Merge Button
-  console.log($(`hub merge ${details.url}`));
+  $$(`hub merge ${details.url}`);
   // Push merge to target branch
-  console.log($(`hub push`));
+  $$(`hub push`);
   // Delete remote head branch
-  console.log($(`hub push ${remote} :${details.headBranch}`));
+  $$(`hub push ${remote} :${details.headBranch}`);
   // Bring in any more changes and remote local head branch
-  console.log($(`hub sync`));
+  $$(`hub sync`);
 }
 
 module.exports = mergePullRequest;

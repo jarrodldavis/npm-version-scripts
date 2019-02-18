@@ -1,15 +1,15 @@
 #! /usr/bin/env node
 
-const { $ } = require('./helpers');
+const { $$ } = require('./helpers');
 const { getRepoInfo, ensureSynchronized } = require('./repo');
 
 const { defaultBranch } = getRepoInfo();
 
 // checkout development branch
-console.log($(`hub checkout ${defaultBranch}`));
+$$(`hub checkout ${defaultBranch}`);
 // bring in any changes from upstream
-console.log($(`hub sync`));
+$$(`hub sync`);
 // ensure local and remote head branch are in sync (`hub sync` only warns)
 ensureSynchronized();
 // run test suite
-console.log($(`npm test`));
+$$(`npm test`);

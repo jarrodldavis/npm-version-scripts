@@ -1,8 +1,12 @@
 const childProcess = require('child_process');
 const path = require('path');
 
-function $(command) {
-  return childProcess.execSync(command, { encoding: 'utf-8' }).toString().trim();
+function $(command, options = {}) {
+  return childProcess.execSync(command, { encoding: 'utf-8', ...options }).toString().trim();
+}
+
+function $$(command, options = {}) {
+  return $(command, { ...options, stdio: inherit });
 }
 
 function getScriptName() {
@@ -41,4 +45,4 @@ function graphql(query) {
   }
 }
 
-module.exports = { $, exit, graphql };
+module.exports = { $, $$, exit, graphql };
