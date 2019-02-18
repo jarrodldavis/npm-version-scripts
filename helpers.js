@@ -1,4 +1,5 @@
 const childProcess = require('child_process');
+const path = require('path');
 
 function $(command) {
   return childProcess.execSync(command, { encoding: 'utf-8' }).toString().trim();
