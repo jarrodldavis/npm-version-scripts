@@ -12,7 +12,7 @@ const { releaseBranch, productionBranch, prTitle, defaultBranch, milestone } = g
 const rawResults = $(`hub pr list --head ${releaseBranch} --base ${productionBranch} -f "%I"`);
 const [prId, ...others] = rawResults.split(EOL);
 const arrow = "\u2190";
-if (typeof prId !== 'string' || id.length === 0) {
+if (typeof prId !== 'string' || prId.length === 0) {
   exit(`no open pull request for ${productionBranch} ${arrow} ${releaseBranch}`);
 } else if (others.length > 0) {
   exit(`multiple pull requests open for ${productionBranch} ${arrow} ${releaseBranch}`);
