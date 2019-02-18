@@ -34,8 +34,8 @@ function mergePullRequest(prId, remote = "origin") {
     exit('use `npm run mergeversion` to merge release branches');
   }
 
+  // CI status must be successful
   $$(`hub ci-status -v ${details.sha}`);
-
   // switch to pull request target branch
   $$(`hub checkout ${details.baseBranch}`);
   // bring in any changes from upstream
