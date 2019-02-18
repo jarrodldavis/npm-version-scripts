@@ -6,7 +6,7 @@ function $(command, options = {}) {
 }
 
 function $$(command, options = {}) {
-  return $(command, { ...options, stdio: inherit });
+  return $(command, { ...options, stdio: 'inherit' });
 }
 
 function getScriptName() {
