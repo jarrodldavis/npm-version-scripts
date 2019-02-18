@@ -2,6 +2,11 @@ const { EOL } = require('os');
 
 const { $, exit } = require('./helpers');
 const { ensureHub } = require('./environment');
+const { getDefaultBranch } = require('./repo');
+
+function isMergeVersionScript() {
+  return process.env.npm_lifecycle_event === 'mergeversion';
+}
 
 function mergePullRequest(prId, remote = "origin") {
   if (typeof prId !== 'string' || prId.length === 0) {
@@ -22,6 +27,11 @@ function mergePullRequest(prId, remote = "origin") {
   
   if (details === undefined) {
     exit(`${prId} - not an open pull request number`)
+  }
+
+  const defaultBranch = getDefaultBranch();
+  if (headBranch.startsWith('release') && baseBranch !== defaultBranch && !isMergeVersionScript()) {
+    exit('use `npm run mergeversion` to merge release branches');
   }
 
   try {

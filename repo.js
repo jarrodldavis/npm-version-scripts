@@ -65,4 +65,4 @@ function ensureSynchronized() {
   }
 }
 
-module.exports = { getRepoInfo, ensureSynchronized };
+module.exports = { getRepoInfo, ensureSynchronized, getDefaultBranch };
