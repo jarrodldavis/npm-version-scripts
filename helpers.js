@@ -4,8 +4,17 @@ function $(command) {
   return childProcess.execSync(command, { encoding: 'utf-8' }).toString().trim();
 }
 
+function getScriptName() {
+  const [/*node*/, file] = process.argv;
+  let name = path.basename(file, path.extname(file));
+  if (name.startsWith('git-')) {
+    name = name.substring(4);
+  }
+  return name;
+}
+
 function exit(message) {
-  console.error(`npm version: ${message}`);
+  console.error(`${getScriptName()}: ${message}`);
   process.exit(1);
 }
 
