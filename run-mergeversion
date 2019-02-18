@@ -1,5 +1,26 @@
 #! /usr/bin/env node
 
-const { mergeversion } = require('./core.js');
+const { $, exit } = require('./helpers');
+const { getRepoInfo } = require('./repo');
+const mergePullRequest = require('./merge-pull-request');
 
-mergeversion();
+const { releaseBranch, productionBranch, prTitle, defaultBranch, milestone } = getRepoInfo();
+
+// find current pull request for version release
+const rawResults = $(`hub pr list --head ${releaseBranch} --base ${productionBranch} -f "%I"`);
+const [prId, ...others] = rawResults.split(EOL);
+const arrow = "\u2190";
+if (typeof prId !== 'string' || id.length === 0) {
+  exit(`no open pull request for ${productionBranch} ${arrow} ${releaseBranch}`);
+} else if (others.length > 0) {
+  exit(`multiple pull requests open for ${productionBranch} ${arrow} ${releaseBranch}`);
+}
+
+// merge version release into production branch
+mergePullRequest(prId);
+// update/create release branch to match production branch
+console.log($(`hub checkout -B ${releaseBranch} ${productionBranch}`));
+// re-publish version branch
+console.log($(`hub push --follow-tags --set-upstream origin ${releaseBranch}`));
+// create pull request to merge production commits into default branch
+console.log($(`hub pull-request --no-edit --message "${prTitle}" --base "${defaultBranch}" --milestone "${milestone}"`));

@@ -1,5 +1,15 @@
 #! /usr/bin/env node
 
-const { preversion } = require('./core.js');
+const { $ } = require('./helpers');
+const { getRepoInfo, ensureSynchronized } = require('./repo');
 
-preversion();
+const { defaultBranch } = getRepoInfo();
+
+// checkout development branch
+console.log($(`hub checkout ${defaultBranch}`));
+// bring in any changes from upstream
+console.log($(`hub sync`));
+// ensure local and remote head branch are in sync (`hub sync` only warns)
+ensureSynchronized();
+// run test suite
+console.log($(`npm test`));
