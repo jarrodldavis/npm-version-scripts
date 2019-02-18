@@ -1,5 +1,7 @@
 #! /usr/bin/env node
 
+const { EOL } = require('os');
+
 const { $, exit } = require('./helpers');
 const { getRepoInfo } = require('./repo');
 const mergePullRequest = require('./merge-pull-request');
