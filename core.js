@@ -104,6 +104,10 @@ function determineProductionBranch() {
 }
 
 function mergePullRequest(prId, remote = "origin") {
+  if (typeof prId !== 'string' || prId.length === 0) {
+    exit(`you must specify a pull request number`);
+  }
+
   const separator = '|';
   const rawResults = $(`hub pr list -f "%I${separator}%B${separator}%H${separator}%U${separator}%sH"`);
   
@@ -146,7 +150,7 @@ function findVersionPullRequest() {
   const rawResults = $(`hub pr list --head ${releaseBranch} --base ${productionBranch} -f "%I"`);
   const [id, ...others] = rawResults.split(EOL);
 
-  if (id === undefined) {
+  if (typeof id !== 'string' || id.length === 0) {
     const arrow = "\u2190";
     exit(`no open pull request for ${productionBranch} ${arrow} ${releaseBranch}`);
   } else if (others.length > 0) {
