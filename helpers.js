@@ -2,7 +2,24 @@ const childProcess = require('child_process');
 const path = require('path');
 
 function $(command, options = {}) {
-  return childProcess.execSync(command, { encoding: 'utf-8', ...options }).toString().trim();
+  let output;
+  try {
+    output = childProcess.execSync(command, { encoding: 'utf-8', ...options })
+  } catch(error) {
+    if (error.status) {
+      exit(error.message);
+    } else {
+      throw error;
+    }
+  }
+
+  if (Buffer.isBuffer(output)) {
+    return output.toString().trim();;
+  } else if (typeof output === 'string') {
+    return output.trim();
+  } else {
+    return output;
+  }
 }
 
 function $$(command, options = {}) {
