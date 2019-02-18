@@ -2,7 +2,7 @@ const { EOL } = require('os');
 
 const { $, exit } = require('./helpers');
 const { ensureHub } = require('./environment');
-const { getDefaultBranch } = require('./repo');
+const { ensureSynchronized, getDefaultBranch } = require('./repo');
 
 function isMergeVersionScript() {
   return process.env.npm_lifecycle_event === 'mergeversion';
