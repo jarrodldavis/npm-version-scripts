@@ -202,4 +202,4 @@ function mergeversion() {
   console.log($(`hub pull-request --no-edit --message "${prTitle}" --base "${defaultBranch}" --milestone "${milestone}"`));
 }
 
-module.exports = { preversion, version, postversion, mergeversion };
+module.exports = { preversion, version, postversion, mergeversion, mergePullRequest };
