@@ -161,24 +161,24 @@ function preversion() {
   const defaultBranch = getDefaultBranch();
 
   // checkout development branch
-  $(`hub checkout ${defaultBranch}`);
+  console.log($(`hub checkout ${defaultBranch}`));
   // bring in any changes from upstream
-  $(`hub sync`);
+  console.log($(`hub sync`));
   // ensure local and remote head branch are in sync (`hub sync` only warns)
   ensureSynchronized();
   // run test suite
-  $(`npm test`);
+  console.log($(`npm test`));
 }
 
 function version() {
   const bumpPlugin = `@jarrodldavis/changelog-version-bump=version:'${packageVersion}'`;
 
   // create new release branch
-  $(`hub checkout -b ${releaseBranch}`);
+  console.log($(`hub checkout -b ${releaseBranch}`));
   // update changelog with new version
-  $(`remark CHANGELOG.md -o --use "${bumpPlugin}"`);
+  console.log($(`remark CHANGELOG.md -o --use "${bumpPlugin}"`));
   // add changelog to staging (npm will handle creating the commit)
-  $('hub add CHANGELOG.md');
+  console.log($('hub add CHANGELOG.md'));
 }
 
 function postversion() {
@@ -186,9 +186,9 @@ function postversion() {
   const message = commitMessage.replace(/%s/g, packageVersion);
 
   // publish branch
-  $(`hub push --follow-tags --set-upstream origin ${releaseBranch}`);
+  console.log($(`hub push --follow-tags --set-upstream origin ${releaseBranch}`));
   // create pull request
-  $(`hub pull-request --no-edit --message "${message}" --base "${productionBranch}" --milestone "${milestone}"`);
+  console.log($(`hub pull-request --no-edit --message "${message}" --base "${productionBranch}" --milestone "${milestone}"`));
 }
 
 function mergeversion() {
@@ -200,11 +200,11 @@ function mergeversion() {
   // merge version release into production branch
   mergePullRequest(prId);
   // update/create release branch to match production branch
-  $(`hub checkout -B ${releaseBranch} ${productionBranch}`);
+  console.log($(`hub checkout -B ${releaseBranch} ${productionBranch}`));
   // re-publish version branch
-  $(`hub push --follow-tags --set-upstream origin ${releaseBranch}`);
+  console.log($(`hub push --follow-tags --set-upstream origin ${releaseBranch}`));
   // create pull request to merge production commits into default branch
-  $(`hub pull-request --no-edit --message "${message}" --base "${defaultBranch}" --milestone "${milestone}"`);
+  console.log($(`hub pull-request --no-edit --message "${message}" --base "${defaultBranch}" --milestone "${milestone}"`));
 }
 
 module.exports = { preversion, version, postversion, mergeversion };
