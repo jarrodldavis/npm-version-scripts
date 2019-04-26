@@ -15,7 +15,17 @@ function getDefaultBranch() {
 
 function determineProductionBranch() {
   const defaultBranch = getDefaultBranch();
-  const branches = graphql('protectedBranches(first: 3) { nodes { name } }').protectedBranches.nodes;
+const branches = graphql(`
+branchProtectionRules(first: 3) {
+  nodes {
+    matchingRefs(first: 2) {
+      nodes {
+        name
+      }
+    }
+  }
+}`).branchProtectionRules.nodes.flatMap(node => node.matchingRefs.nodes);
+
 
   if (branches.length !== 2) {
     exit(`expected two protected branches but found ${branches.length}`);
@@ -29,7 +39,7 @@ function determineProductionBranch() {
     case secondBranch:
       return firstBranch;
     default:
-      return exit('could not determine production branch because neither protected branch mataches the default branch');
+      return exit('could not determine production branch because neither protected branch matches the default branch');
   }
 }
 
