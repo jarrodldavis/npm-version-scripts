@@ -3,9 +3,9 @@
 const { $$ } = require('./helpers');
 const { getRepoInfo } = require('./repo');
 
-const { releaseBranch, prTitle, productionBranch, milestone } = getRepoInfo();
+const { remote, releaseBranch, prTitle, productionBranch, milestone } = getRepoInfo();
 
 // publish branch
-$$(`hub push --follow-tags --set-upstream origin ${releaseBranch}`);
+$$(`hub push --follow-tags --set-upstream ${remote} ${releaseBranch}`);
 // create pull request
 $$(`hub pull-request --no-edit --message "${prTitle}" --base "${productionBranch}" --milestone "${milestone}"`);

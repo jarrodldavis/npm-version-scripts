@@ -61,7 +61,9 @@ function getRepoInfo() {
   const milestone = `${versionPrefix}${packageVersion}`;
   ensureMilestone(milestone);
 
-  info = { milestone, releaseBranch, prTitle, defaultBranch, productionBranch };
+  const remote = "origin"; // TODO
+
+  info = { remote, milestone, releaseBranch, prTitle, defaultBranch, productionBranch };
   return info;
 }
 
