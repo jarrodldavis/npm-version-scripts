@@ -38,7 +38,7 @@
     "url": "https://github.com/jarrodldavis/npm-version-scripts/issues"
   },
   "homepage": "https://github.com/jarrodldavis/npm-version-scripts#readme",
-  "devDependencies": {
+  "dependencies": {
     "@jarrodldavis/remark-changelog-version-bump": "^0.1.1",
     "remark-cli": "^6.0.1"
   }
