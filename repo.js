@@ -1,4 +1,4 @@
-const { exit, $, graphql } = require('./helpers');
+const { exit, $, graphql, toArray } = require('./helpers');
 const { getEnvironment, ensureHub } = require('./environment');
 
 function ensureMilestone(milestone) {
@@ -77,4 +77,34 @@ function ensureSynchronized() {
   }
 }
 
-module.exports = { getRepoInfo, ensureSynchronized, getDefaultBranch };
+function getUnmergedBranches(defaultBranch, pattern) {
+  return toArray($(`git branch --list '${pattern}' --format '%(refname:short)' --all --no-merged ${defaultBranch}`));
+}
+
+function ensureNoOtherBumps(remote, defaultBranch, productionBranch) {
+  const unmergedTags = toArray($(`git tag --list --no-merged ${defaultBranch}`));
+  if (unmergedTags.length > 0) {
+    exit(`another version bump is in progress - found unmerged tags: ${unmergedTags.join(", ")}`);
+  }
+
+  let unmergedReleases = [
+    ...getUnmergedBranches(defaultBranch, "release/*"),
+    ...getUnmergedBranches(defaultBranch, `${remote}/release/*`)
+  ];
+
+  if (unmergedReleases.length > 0) {
+    exit(`another version bump is in progress - found unmerged release branches: ${unmergedReleases.join(", ")}`);
+  }
+
+  let unmergedProductionBranches = [
+    ...getUnmergedBranches(defaultBranch, productionBranch),
+    ...getUnmergedBranches(defaultBranch, `${remote}/${productionBranch}`)
+  ];
+
+  if (unmergedProductionBranches.length > 0) {
+    exit(`another version bump is in progress - found unmerged production branches: ${unmergedProductionBranches.join(", ")}`);
+  }
+
+}
+
+module.exports = { getRepoInfo, ensureSynchronized, ensureNoOtherBumps, getDefaultBranch };

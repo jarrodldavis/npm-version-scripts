@@ -1,9 +1,9 @@
 #! /usr/bin/env node
 
 const { $$ } = require('./helpers');
-const { getRepoInfo, ensureSynchronized } = require('./repo');
+const { getRepoInfo, ensureSynchronized, ensureNoOtherBumps } = require('./repo');
 
-const { defaultBranch } = getRepoInfo();
+const { remote, defaultBranch, productionBranch } = getRepoInfo();
 
 // checkout development branch
 $$(`hub checkout ${defaultBranch}`);
@@ -11,5 +11,7 @@ $$(`hub checkout ${defaultBranch}`);
 $$(`hub sync`);
 // ensure local and remote head branch are in sync (`hub sync` only warns)
 ensureSynchronized();
+// ensure no other version bumps are in progress (unmerged tags or release branches)
+ensureNoOtherBumps(remote, defaultBranch, productionBranch);
 // run test suite
 $$(`npm test`);
