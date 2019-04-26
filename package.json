@@ -1,6 +1,6 @@
 {
   "name": "@jarrodldavis/version-scripts",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Shell scripts to automate cutting release branches for npm packages",
   "main": "index.js",
   "bin": {
