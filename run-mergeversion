@@ -6,7 +6,9 @@ const { $, $$, exit } = require('./helpers');
 const { getRepoInfo } = require('./repo');
 const mergePullRequest = require('./merge-pull-request');
 
-const { remote, releaseBranch, productionBranch, prTitle, defaultBranch, milestone } = getRepoInfo();
+const [/*node*/, /*file*/, releaseVersion] = process.argv
+
+const { remote, releaseBranch, productionBranch, prTitle, defaultBranch, milestone } = getRepoInfo(releaseVersion);
 
 // find current pull request for version release
 const rawResults = $(`hub pr list --head ${releaseBranch} --base ${productionBranch} -f "%I"`);

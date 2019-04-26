@@ -44,7 +44,7 @@ branchProtectionRules(first: 3) {
 }
 
 let info;
-function getRepoInfo() {
+function getRepoInfo(releaseVersion = null) {
   if (typeof info === 'object') {
     return info;
   }
@@ -52,13 +52,17 @@ function getRepoInfo() {
   ensureHub();
 
   const { packageVersion, versionPrefix, commitMessage } = getEnvironment();
-  const releaseBranch = `release/${packageVersion}`;
-  const prTitle = commitMessage.replace(/%s/g, packageVersion);
+  if (releaseVersion === null) {
+    releaseVersion = packageVersion;
+  }
+
+  const releaseBranch = `release/${releaseVersion}`;
+  const prTitle = commitMessage.replace(/%s/g, releaseVersion);
 
   const defaultBranch = getDefaultBranch();
   const productionBranch = determineProductionBranch();
 
-  const milestone = `${versionPrefix}${packageVersion}`;
+  const milestone = `${versionPrefix}${releaseVersion}`;
   ensureMilestone(milestone);
 
   const remote = "origin"; // TODO
