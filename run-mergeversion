@@ -7,6 +7,9 @@ const { getRepoInfo } = require('./repo');
 const mergePullRequest = require('./merge-pull-request');
 
 const [/*node*/, /*file*/, releaseVersion] = process.argv
+if (!releaseVersion) {
+  exit(`release version is required`)
+}
 
 const { remote, releaseBranch, productionBranch, prTitle, defaultBranch, milestone } = getRepoInfo(releaseVersion);
 
