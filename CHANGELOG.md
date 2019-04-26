@@ -17,9 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Development and CI
 
 -   npm `package.json` for publishing ([#1]), ([#2])
+-   npm config ([#7])
 
 [#1]: https://github.com/jarrodldavis/npm-version-scripts/pull/1
 
 [#2]: https://github.com/jarrodldavis/npm-version-scripts/pull/2
+
+[#7]: https://github.com/jarrodldavis/npm-version-scripts/pull/7
 
 [Unreleased]: https://github.com/jarrodldavis/npm-version-scripts/compare/v0.0.1...HEAD
