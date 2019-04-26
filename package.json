@@ -21,8 +21,12 @@
     "url": "git+https://github.com/jarrodldavis/npm-version-scripts.git"
   },
   "keywords": [
+    "npm",
+    "npm-scripts",
     "npm-version",
-    "version",
+    "npm-package",
+    "release-management",
+    "release-branching",
     "shell",
     "shell-scripts",
     "cli",
