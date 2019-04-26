@@ -2,13 +2,15 @@
 
 const { $$ } = require('./helpers');
 const { getEnvironment } = require('./environment');
-const { getRepoInfo } = require('./repo');
+const { getRepoInfo, ensureUnreleased } = require('./repo');
 
-const { packageVersion } = getEnvironment();
-const { releaseBranch } = getRepoInfo();
+const { versionPrefix, packageVersion } = getEnvironment();
+const { releaseBranch, defaultBranch } = getRepoInfo();
 
 const bumpPlugin = `@jarrodldavis/changelog-version-bump=version:'${packageVersion}'`;
 
+// ensure new version hasn't already been released
+ensureUnreleased(`${versionPrefix}${packageVersion}`, defaultBranch);
 // create new release branch
 $$(`hub checkout -b ${releaseBranch}`);
 // update changelog with new version

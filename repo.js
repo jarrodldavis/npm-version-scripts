@@ -108,7 +108,13 @@ function ensureNoOtherBumps(remote, defaultBranch, productionBranch) {
   if (unmergedProductionBranches.length > 0) {
     exit(`another version bump is in progress - found unmerged production branches: ${unmergedProductionBranches.join(", ")}`);
   }
-
 }
 
-module.exports = { getRepoInfo, ensureSynchronized, ensureNoOtherBumps, getDefaultBranch };
+function ensureUnreleased(releaseVersion, defaultBranch) {
+  const mergedTags = toArray($(`git tag --list '${releaseVersion}' --merged ${defaultBranch}`));
+  if (mergedTags.length > 0) {
+    exit(`version already released - found merged tags: ${mergedTags.join(", ")}`);
+  }
+}
+
+module.exports = { getRepoInfo, ensureSynchronized, ensureNoOtherBumps, ensureUnreleased, getDefaultBranch };
