@@ -62,4 +62,12 @@ function graphql(query) {
   }
 }
 
-module.exports = { $, $$, exit, graphql };
+function toArray(listString) {
+  if (!listString) {
+    return [];
+  }
+
+  return listString.split(/\r?\n/);
+}
+
+module.exports = { $, $$, exit, graphql, toArray };

@@ -1,4 +1,4 @@
-const { exit, $, graphql } = require('./helpers');
+const { exit, $, graphql, toArray } = require('./helpers');
 const { getEnvironment, ensureHub } = require('./environment');
 
 function ensureMilestone(milestone) {
@@ -15,7 +15,17 @@ function getDefaultBranch() {
 
 function determineProductionBranch() {
   const defaultBranch = getDefaultBranch();
-  const branches = graphql('protectedBranches(first: 3) { nodes { name } }').protectedBranches.nodes;
+const branches = graphql(`
+branchProtectionRules(first: 3) {
+  nodes {
+    matchingRefs(first: 2) {
+      nodes {
+        name
+      }
+    }
+  }
+}`).branchProtectionRules.nodes.flatMap(node => node.matchingRefs.nodes);
+
 
   if (branches.length !== 2) {
     exit(`expected two protected branches but found ${branches.length}`);
@@ -29,12 +39,12 @@ function determineProductionBranch() {
     case secondBranch:
       return firstBranch;
     default:
-      return exit('could not determine production branch because neither protected branch mataches the default branch');
+      return exit('could not determine production branch because neither protected branch matches the default branch');
   }
 }
 
 let info;
-function getRepoInfo() {
+function getRepoInfo(releaseVersion = null) {
   if (typeof info === 'object') {
     return info;
   }
@@ -42,16 +52,22 @@ function getRepoInfo() {
   ensureHub();
 
   const { packageVersion, versionPrefix, commitMessage } = getEnvironment();
-  const releaseBranch = `release/${packageVersion}`;
-  const prTitle = commitMessage.replace(/%s/g, packageVersion);
+  if (releaseVersion === null) {
+    releaseVersion = packageVersion;
+  }
+
+  const releaseBranch = `release/${releaseVersion}`;
+  const prTitle = commitMessage.replace(/%s/g, releaseVersion);
 
   const defaultBranch = getDefaultBranch();
   const productionBranch = determineProductionBranch();
 
-  const milestone = `${versionPrefix}${packageVersion}`;
+  const milestone = `${versionPrefix}${releaseVersion}`;
   ensureMilestone(milestone);
 
-  info = { milestone, releaseBranch, prTitle, defaultBranch, productionBranch };
+  const remote = "origin"; // TODO
+
+  info = { remote, milestone, releaseBranch, prTitle, defaultBranch, productionBranch };
   return info;
 }
 
@@ -65,4 +81,40 @@ function ensureSynchronized() {
   }
 }
 
-module.exports = { getRepoInfo, ensureSynchronized, getDefaultBranch };
+function getUnmergedBranches(defaultBranch, pattern) {
+  return toArray($(`git branch --list '${pattern}' --format '%(refname:short)' --all --no-merged ${defaultBranch}`));
+}
+
+function ensureNoOtherBumps(remote, defaultBranch, productionBranch) {
+  const unmergedTags = toArray($(`git tag --list --no-merged ${defaultBranch}`));
+  if (unmergedTags.length > 0) {
+    exit(`another version bump is in progress - found unmerged tags: ${unmergedTags.join(", ")}`);
+  }
+
+  let unmergedReleases = [
+    ...getUnmergedBranches(defaultBranch, "release/*"),
+    ...getUnmergedBranches(defaultBranch, `${remote}/release/*`)
+  ];
+
+  if (unmergedReleases.length > 0) {
+    exit(`another version bump is in progress - found unmerged release branches: ${unmergedReleases.join(", ")}`);
+  }
+
+  let unmergedProductionBranches = [
+    ...getUnmergedBranches(defaultBranch, productionBranch),
+    ...getUnmergedBranches(defaultBranch, `${remote}/${productionBranch}`)
+  ];
+
+  if (unmergedProductionBranches.length > 0) {
+    exit(`another version bump is in progress - found unmerged production branches: ${unmergedProductionBranches.join(", ")}`);
+  }
+}
+
+function ensureUnreleased(releaseVersion, defaultBranch) {
+  const mergedTags = toArray($(`git tag --list '${releaseVersion}' --merged ${defaultBranch}`));
+  if (mergedTags.length > 0) {
+    exit(`version already released - found merged tags: ${mergedTags.join(", ")}`);
+  }
+}
+
+module.exports = { getRepoInfo, ensureSynchronized, ensureNoOtherBumps, ensureUnreleased, getDefaultBranch };
