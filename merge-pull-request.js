@@ -16,7 +16,7 @@ function mergePullRequest(prId, remote = "origin") {
   ensureHub();
 
   const separator = '|';
-  const rawResults = $(`hub pr list -f "%I${separator}%B${separator}%H${separator}%U${separator}%sH"`);
+  const rawResults = $(`hub pr list -f "%I${separator}%B${separator}%H${separator}%U${separator}%sH%n"`);
   
   const results = rawResults.split(EOL).map(line => {
     const [id, baseBranch, headBranch, url, sha] = line.split(separator);
