@@ -10,7 +10,11 @@
     "run-mergeversion": "./run-mergeversion"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "preversion": "./run-preversion",
+    "version": "./run-version",
+    "postversion": "./run-postversion",
+    "mergeversion": "./run-mergeversion"
   },
   "repository": {
     "type": "git",
