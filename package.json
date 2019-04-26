@@ -3,6 +3,12 @@
   "version": "0.0.1",
   "description": "Shell scripts to automate cutting release branches for npm packages",
   "main": "index.js",
+  "bin": {
+    "run-preversion": "./run-preversion",
+    "run-version": "./run-version",
+    "run-postversion": "./run-postversion",
+    "run-mergeversion": "./run-mergeversion"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
